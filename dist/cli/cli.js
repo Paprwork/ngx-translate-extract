@@ -1,21 +1,19 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.cli = void 0;
-const yargs = require("yargs");
-const colorette_1 = require("colorette");
-const extract_task_1 = require("./tasks/extract.task");
-const pipe_parser_1 = require("../parsers/pipe.parser");
-const directive_parser_1 = require("../parsers/directive.parser");
-const service_parser_1 = require("../parsers/service.parser");
-const marker_parser_1 = require("../parsers/marker.parser");
-const sort_by_key_post_processor_1 = require("../post-processors/sort-by-key.post-processor");
-const key_as_default_value_post_processor_1 = require("../post-processors/key-as-default-value.post-processor");
-const null_as_default_value_post_processor_1 = require("../post-processors/null-as-default-value.post-processor");
-const string_as_default_value_post_processor_1 = require("../post-processors/string-as-default-value.post-processor");
-const purge_obsolete_keys_post_processor_1 = require("../post-processors/purge-obsolete-keys.post-processor");
-const compiler_factory_1 = require("../compilers/compiler.factory");
-const fs_helpers_1 = require("../utils/fs-helpers");
-const donate_1 = require("../utils/donate");
-const y = yargs.option('patterns', {
+import yargs from 'yargs';
+import { red, green } from 'colorette';
+import { ExtractTask } from './tasks/extract.task.js';
+import { PipeParser } from '../parsers/pipe.parser.js';
+import { DirectiveParser } from '../parsers/directive.parser.js';
+import { ServiceParser } from '../parsers/service.parser.js';
+import { MarkerParser } from '../parsers/marker.parser.js';
+import { SortByKeyPostProcessor } from '../post-processors/sort-by-key.post-processor.js';
+import { KeyAsDefaultValuePostProcessor } from '../post-processors/key-as-default-value.post-processor.js';
+import { NullAsDefaultValuePostProcessor } from '../post-processors/null-as-default-value.post-processor.js';
+import { StringAsDefaultValuePostProcessor } from '../post-processors/string-as-default-value.post-processor.js';
+import { PurgeObsoleteKeysPostProcessor } from '../post-processors/purge-obsolete-keys.post-processor.js';
+import { CompilerFactory } from '../compilers/compiler.factory.js';
+import { normalizePaths } from '../utils/fs-helpers.js';
+import { donateMessage } from '../utils/donate.js';
+const y = yargs().option('patterns', {
     alias: 'p',
     describe: 'Default patterns',
     type: 'array',
@@ -23,9 +21,9 @@ const y = yargs.option('patterns', {
     hidden: true
 });
 const parsed = y.parse();
-exports.cli = y
+export const cli = y
     .usage('Extract strings from files for translation.\nUsage: $0 [options]')
-    .version(require(__dirname + '/../../package.json').version)
+    .version(process.env.npm_package_version)
     .alias('version', 'v')
     .help('help')
     .alias('help', 'h')
@@ -38,7 +36,7 @@ exports.cli = y
     required: true
 })
     .coerce('input', (input) => {
-    const paths = fs_helpers_1.normalizePaths(input, parsed.patterns);
+    const paths = normalizePaths(input, parsed.patterns);
     return paths;
 })
     .option('output', {
@@ -49,7 +47,7 @@ exports.cli = y
     required: true
 })
     .coerce('output', (output) => {
-    const paths = fs_helpers_1.normalizePaths(output, parsed.patterns);
+    const paths = normalizePaths(output, parsed.patterns);
     return paths;
 })
     .option('format', {
@@ -110,40 +108,40 @@ exports.cli = y
     .wrap(110)
     .exitProcess(true)
     .parse(process.argv);
-const extractTask = new extract_task_1.ExtractTask(exports.cli.input, exports.cli.output, {
-    replace: exports.cli.replace
+const extractTask = new ExtractTask(cli.input, cli.output, {
+    replace: cli.replace
 });
-const parsers = [new pipe_parser_1.PipeParser(), new directive_parser_1.DirectiveParser(), new service_parser_1.ServiceParser(), new marker_parser_1.MarkerParser()];
+const parsers = [new PipeParser(), new DirectiveParser(), new ServiceParser(), new MarkerParser()];
 extractTask.setParsers(parsers);
 const postProcessors = [];
-if (exports.cli.clean) {
-    postProcessors.push(new purge_obsolete_keys_post_processor_1.PurgeObsoleteKeysPostProcessor());
+if (cli.clean) {
+    postProcessors.push(new PurgeObsoleteKeysPostProcessor());
 }
-if (exports.cli.keyAsDefaultValue) {
-    postProcessors.push(new key_as_default_value_post_processor_1.KeyAsDefaultValuePostProcessor());
+if (cli.keyAsDefaultValue) {
+    postProcessors.push(new KeyAsDefaultValuePostProcessor());
 }
-else if (exports.cli.nullAsDefaultValue) {
-    postProcessors.push(new null_as_default_value_post_processor_1.NullAsDefaultValuePostProcessor());
+else if (cli.nullAsDefaultValue) {
+    postProcessors.push(new NullAsDefaultValuePostProcessor());
 }
-else if (exports.cli.stringAsDefaultValue) {
-    postProcessors.push(new string_as_default_value_post_processor_1.StringAsDefaultValuePostProcessor({ defaultValue: exports.cli.stringAsDefaultValue }));
+else if (cli.stringAsDefaultValue) {
+    postProcessors.push(new StringAsDefaultValuePostProcessor({ defaultValue: cli.stringAsDefaultValue }));
 }
-if (exports.cli.sort) {
-    postProcessors.push(new sort_by_key_post_processor_1.SortByKeyPostProcessor());
+if (cli.sort) {
+    postProcessors.push(new SortByKeyPostProcessor());
 }
 extractTask.setPostProcessors(postProcessors);
-const compiler = compiler_factory_1.CompilerFactory.create(exports.cli.format, {
-    indentation: exports.cli.formatIndentation
+const compiler = CompilerFactory.create(cli.format, {
+    indentation: cli.formatIndentation
 });
 extractTask.setCompiler(compiler);
 try {
     extractTask.execute();
-    console.log(colorette_1.green('\nDone.\n'));
-    console.log(donate_1.donateMessage);
+    console.log(green('\nDone.\n'));
+    console.log(donateMessage);
     process.exit(0);
 }
 catch (e) {
-    console.log(colorette_1.red(`\nAn error occurred: ${e}\n`));
+    console.log(red(`\nAn error occurred: ${e}\n`));
     process.exit(1);
 }
 //# sourceMappingURL=cli.js.map

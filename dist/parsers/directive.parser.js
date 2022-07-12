@@ -1,25 +1,23 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DirectiveParser = void 0;
-const compiler_1 = require("@angular/compiler");
-const translation_collection_1 = require("../utils/translation.collection");
-const utils_1 = require("../utils/utils");
+import { parseTemplate, TmplAstElement as Element, TmplAstText as Text, TmplAstTemplate as Template, ASTWithSource, LiteralPrimitive, Conditional, Binary, BindingPipe, Interpolation, LiteralArray, LiteralMap } from '@angular/compiler';
+import { TranslationCollection } from '../utils/translation.collection.js';
+import { isPathAngularComponent, extractComponentInlineTemplate } from '../utils/utils.js';
 const TRANSLATE_ATTR_NAME = 'translate';
-class DirectiveParser {
+export class DirectiveParser {
     extract(source, filePath) {
-        let collection = new translation_collection_1.TranslationCollection();
-        if (filePath && utils_1.isPathAngularComponent(filePath)) {
-            source = utils_1.extractComponentInlineTemplate(source);
+        let collection = new TranslationCollection();
+        if (filePath && isPathAngularComponent(filePath)) {
+            source = extractComponentInlineTemplate(source);
         }
         const nodes = this.parseTemplate(source, filePath);
         const elements = this.getElementsWithTranslateAttribute(nodes);
         elements.forEach((element) => {
             const attribute = this.getAttribute(element, TRANSLATE_ATTR_NAME);
-            if (attribute === null || attribute === void 0 ? void 0 : attribute.value) {
+            if (attribute?.value) {
                 collection = collection.add(attribute.value);
                 return;
             }
             const boundAttribute = this.getBoundAttribute(element, TRANSLATE_ATTR_NAME);
-            if (boundAttribute === null || boundAttribute === void 0 ? void 0 : boundAttribute.value) {
+            if (boundAttribute?.value) {
                 this.getLiteralPrimitives(boundAttribute.value).forEach((literalPrimitive) => {
                     collection = collection.add(literalPrimitive.value);
                 });
@@ -64,29 +62,29 @@ class DirectiveParser {
         return element.inputs.find((input) => input.name === name);
     }
     getLiteralPrimitives(exp) {
-        if (exp instanceof compiler_1.LiteralPrimitive) {
+        if (exp instanceof LiteralPrimitive) {
             return [exp];
         }
         let visit = [];
-        if (exp instanceof compiler_1.Interpolation) {
+        if (exp instanceof Interpolation) {
             visit = exp.expressions;
         }
-        else if (exp instanceof compiler_1.LiteralArray) {
+        else if (exp instanceof LiteralArray) {
             visit = exp.expressions;
         }
-        else if (exp instanceof compiler_1.LiteralMap) {
+        else if (exp instanceof LiteralMap) {
             visit = exp.values;
         }
-        else if (exp instanceof compiler_1.BindingPipe) {
+        else if (exp instanceof BindingPipe) {
             visit = [exp.exp];
         }
-        else if (exp instanceof compiler_1.Conditional) {
+        else if (exp instanceof Conditional) {
             visit = [exp.trueExp, exp.falseExp];
         }
-        else if (exp instanceof compiler_1.Binary) {
+        else if (exp instanceof Binary) {
             visit = [exp.left, exp.right];
         }
-        else if (exp instanceof compiler_1.ASTWithSource) {
+        else if (exp instanceof ASTWithSource) {
             visit = [exp.ast];
         }
         let results = [];
@@ -96,14 +94,13 @@ class DirectiveParser {
         return results;
     }
     isElementLike(node) {
-        return node instanceof compiler_1.TmplAstElement || node instanceof compiler_1.TmplAstTemplate;
+        return node instanceof Element || node instanceof Template;
     }
     isText(node) {
-        return node instanceof compiler_1.TmplAstText;
+        return node instanceof Text;
     }
     parseTemplate(template, path) {
-        return compiler_1.parseTemplate(template, path).nodes;
+        return parseTemplate(template, path).nodes;
     }
 }
-exports.DirectiveParser = DirectiveParser;
 //# sourceMappingURL=directive.parser.js.map

@@ -1,15 +1,13 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PipeParser = void 0;
-const compiler_1 = require("@angular/compiler");
-const translation_collection_1 = require("../utils/translation.collection");
-const utils_1 = require("../utils/utils");
+import { parseTemplate, BindingPipe, LiteralPrimitive, Conditional, Binary, LiteralMap, LiteralArray, Interpolation, Call } from '@angular/compiler';
+import { TranslationCollection } from '../utils/translation.collection.js';
+import { isPathAngularComponent, extractComponentInlineTemplate } from '../utils/utils.js';
 const TRANSLATE_PIPE_NAME = 'translate';
-class PipeParser {
+export class PipeParser {
     extract(source, filePath) {
-        if (filePath && utils_1.isPathAngularComponent(filePath)) {
-            source = utils_1.extractComponentInlineTemplate(source);
+        if (filePath && isPathAngularComponent(filePath)) {
+            source = extractComponentInlineTemplate(source);
         }
-        let collection = new translation_collection_1.TranslationCollection();
+        let collection = new TranslationCollection();
         const nodes = this.parseTemplate(source, filePath);
         const pipes = nodes.map((node) => this.findPipesInNode(node)).flat();
         pipes.forEach((pipe) => {
@@ -20,27 +18,25 @@ class PipeParser {
         return collection;
     }
     findPipesInNode(node) {
-        var _a;
         let ret = [];
-        if (node === null || node === void 0 ? void 0 : node.children) {
+        if (node?.children) {
             ret = node.children.reduce((result, childNode) => {
                 const children = this.findPipesInNode(childNode);
                 return result.concat(children);
             }, [ret]);
         }
-        if ((_a = node === null || node === void 0 ? void 0 : node.value) === null || _a === void 0 ? void 0 : _a.ast) {
+        if (node?.value?.ast) {
             ret.push(...this.getTranslatablesFromAst(node.value.ast));
         }
-        if (node === null || node === void 0 ? void 0 : node.attributes) {
+        if (node?.attributes) {
             const translateableAttributes = node.attributes.filter((attr) => {
                 return attr.name === TRANSLATE_PIPE_NAME;
             });
             ret = [...ret, ...translateableAttributes];
         }
-        if (node === null || node === void 0 ? void 0 : node.inputs) {
+        if (node?.inputs) {
             node.inputs.forEach((input) => {
-                var _a;
-                if ((_a = input === null || input === void 0 ? void 0 : input.value) === null || _a === void 0 ? void 0 : _a.ast) {
+                if (input?.value?.ast) {
                     ret.push(...this.getTranslatablesFromAst(input.value.ast));
                 }
             });
@@ -49,16 +45,16 @@ class PipeParser {
     }
     parseTranslationKeysFromPipe(pipeContent) {
         const ret = [];
-        if (pipeContent instanceof compiler_1.LiteralPrimitive) {
+        if (pipeContent instanceof LiteralPrimitive) {
             ret.push(pipeContent.value);
         }
-        else if (pipeContent instanceof compiler_1.Conditional) {
+        else if (pipeContent instanceof Conditional) {
             const trueExp = pipeContent.trueExp;
             ret.push(...this.parseTranslationKeysFromPipe(trueExp));
             const falseExp = pipeContent.falseExp;
             ret.push(...this.parseTranslationKeysFromPipe(falseExp));
         }
-        else if (pipeContent instanceof compiler_1.BindingPipe) {
+        else if (pipeContent instanceof BindingPipe) {
             console.log('--------------');
             if (pipeContent.args[0]) {
                 const index = pipeContent.args[0].keys.findIndex((item) => item.key === 'default');
@@ -81,25 +77,27 @@ class PipeParser {
         if (this.expressionIsOrHasBindingPipe(ast)) {
             return [ast];
         }
-        if (ast instanceof compiler_1.Interpolation) {
+        if (ast instanceof Interpolation) {
             return this.getTranslatablesFromAsts(ast.expressions);
         }
-        if (ast instanceof compiler_1.Conditional) {
+        if (ast instanceof Conditional) {
             return this.getTranslatablesFromAsts([ast.trueExp, ast.falseExp]);
         }
-        if (ast instanceof compiler_1.Binary) {
-            return this.getTranslatablesFromAsts([ast.left, ast.right]);
+        if (ast instanceof Binary) {
+            if (ast?.left && ast?.right) {
+                return this.getTranslatablesFromAsts([ast.left, ast.right]);
+            }
         }
-        if (ast instanceof compiler_1.BindingPipe) {
+        if (ast instanceof BindingPipe) {
             return this.getTranslatablesFromAst(ast.exp);
         }
-        if (ast instanceof compiler_1.LiteralMap) {
+        if (ast instanceof LiteralMap) {
             return this.getTranslatablesFromAsts(ast.values);
         }
-        if (ast instanceof compiler_1.LiteralArray) {
+        if (ast instanceof LiteralArray) {
             return this.getTranslatablesFromAsts(ast.expressions);
         }
-        if (ast instanceof compiler_1.MethodCall) {
+        if (ast instanceof Call) {
             return this.getTranslatablesFromAsts(ast.args);
         }
         return [];
@@ -114,14 +112,13 @@ class PipeParser {
         if (exp.name && exp.name === TRANSLATE_PIPE_NAME) {
             return true;
         }
-        if (exp.exp && exp.exp instanceof compiler_1.BindingPipe) {
+        if (exp.exp && exp.exp instanceof BindingPipe) {
             return this.expressionIsOrHasBindingPipe(exp.exp);
         }
         return false;
     }
     parseTemplate(template, path) {
-        return compiler_1.parseTemplate(template, path).nodes;
+        return parseTemplate(template, path).nodes;
     }
 }
-exports.PipeParser = PipeParser;
 //# sourceMappingURL=pipe.parser.js.map

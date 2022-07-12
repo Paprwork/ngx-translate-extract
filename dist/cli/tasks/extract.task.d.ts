@@ -1,8 +1,8 @@
-import { TranslationCollection } from '../../utils/translation.collection';
-import { TaskInterface } from './task.interface';
-import { ParserInterface } from '../../parsers/parser.interface';
-import { PostProcessorInterface } from '../../post-processors/post-processor.interface';
-import { CompilerInterface } from '../../compilers/compiler.interface';
+import { TranslationCollection } from '../../utils/translation.collection.js';
+import { TaskInterface } from './task.interface.js';
+import { ParserInterface } from '../../parsers/parser.interface.js';
+import { PostProcessorInterface } from '../../post-processors/post-processor.interface.js';
+import { CompilerInterface } from '../../compilers/compiler.interface.js';
 export interface ExtractTaskOptionsInterface {
     replace?: boolean;
 }

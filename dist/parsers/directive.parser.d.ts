@@ -1,6 +1,6 @@
 import { TmplAstNode as Node, TmplAstElement as Element, TmplAstText as Text, TmplAstTemplate as Template, TmplAstTextAttribute as TextAttribute, TmplAstBoundAttribute as BoundAttribute, AST, LiteralPrimitive } from '@angular/compiler';
-import { ParserInterface } from './parser.interface';
-import { TranslationCollection } from '../utils/translation.collection';
+import { ParserInterface } from './parser.interface.js';
+import { TranslationCollection } from '../utils/translation.collection.js';
 declare type ElementLike = Element | Template;
 export declare class DirectiveParser implements ParserInterface {
     extract(source: string, filePath: string): TranslationCollection | null;

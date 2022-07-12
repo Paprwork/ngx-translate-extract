@@ -1,8 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TranslationCollection = void 0;
-class TranslationCollection {
+export class TranslationCollection {
+    values = {};
     constructor(values = {}) {
-        this.values = {};
         this.values = values;
     }
     add(key, val = '') {
@@ -72,5 +70,4 @@ class TranslationCollection {
         return new TranslationCollection(values);
     }
 }
-exports.TranslationCollection = TranslationCollection;
 //# sourceMappingURL=translation.collection.js.map

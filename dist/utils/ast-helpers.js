@@ -1,19 +1,17 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStringsFromExpression = exports.findPropertyCallExpressions = exports.findFunctionCallExpressions = exports.findClassPropertyDeclarationByType = exports.findClassPropertyConstructorParameterByType = exports.findMethodCallExpressions = exports.findMethodParameterByType = exports.findConstructorDeclaration = exports.findClassPropertyByType = exports.findClassDeclarations = exports.getNamedImportAlias = exports.getNamedImports = void 0;
-const tsquery_1 = require("@phenomnomnominal/tsquery");
-const typescript_1 = require("typescript");
-function getNamedImports(node, moduleName) {
+import { tsquery } from '@phenomnomnominal/tsquery';
+import pkg from 'typescript';
+const { SyntaxKind, isStringLiteralLike, isArrayLiteralExpression, isBinaryExpression, isConditionalExpression } = pkg;
+export function getNamedImports(node, moduleName) {
     const query = `ImportDeclaration[moduleSpecifier.text="${moduleName}"] NamedImports`;
-    return tsquery_1.tsquery(node, query);
+    return tsquery(node, query);
 }
-exports.getNamedImports = getNamedImports;
-function getNamedImportAlias(node, moduleName, importName) {
+export function getNamedImportAlias(node, moduleName, importName) {
     const [namedImportNode] = getNamedImports(node, moduleName);
     if (!namedImportNode) {
         return null;
     }
     const query = `ImportSpecifier:has(Identifier[name="${importName}"]) > Identifier`;
-    const identifiers = tsquery_1.tsquery(namedImportNode, query);
+    const identifiers = tsquery(namedImportNode, query);
     if (identifiers.length === 1) {
         return identifiers[0].text;
     }
@@ -22,95 +20,85 @@ function getNamedImportAlias(node, moduleName, importName) {
     }
     return null;
 }
-exports.getNamedImportAlias = getNamedImportAlias;
-function findClassDeclarations(node) {
+export function findClassDeclarations(node) {
     const query = 'ClassDeclaration';
-    return tsquery_1.tsquery(node, query);
+    return tsquery(node, query);
 }
-exports.findClassDeclarations = findClassDeclarations;
-function findClassPropertyByType(node, type) {
+export function findClassPropertyByType(node, type) {
     return findClassPropertyConstructorParameterByType(node, type) || findClassPropertyDeclarationByType(node, type);
 }
-exports.findClassPropertyByType = findClassPropertyByType;
-function findConstructorDeclaration(node) {
+export function findConstructorDeclaration(node) {
     const query = `Constructor`;
-    const [result] = tsquery_1.tsquery(node, query);
+    const [result] = tsquery(node, query);
     return result;
 }
-exports.findConstructorDeclaration = findConstructorDeclaration;
-function findMethodParameterByType(node, type) {
+export function findMethodParameterByType(node, type) {
     const query = `Parameter:has(TypeReference > Identifier[name="${type}"]) > Identifier`;
-    const [result] = tsquery_1.tsquery(node, query);
+    const [result] = tsquery(node, query);
     if (result) {
         return result.text;
     }
     return null;
 }
-exports.findMethodParameterByType = findMethodParameterByType;
-function findMethodCallExpressions(node, propName, fnName) {
+export function findMethodCallExpressions(node, propName, fnName) {
     if (Array.isArray(fnName)) {
         fnName = fnName.join('|');
     }
     const query = `CallExpression > PropertyAccessExpression:has(Identifier[name=/^(${fnName})$/]):has(PropertyAccessExpression:has(Identifier[name="${propName}"]):not(:has(ThisKeyword)))`;
-    const nodes = tsquery_1.tsquery(node, query).map((n) => n.parent);
+    const nodes = tsquery(node, query).map((n) => n.parent);
     return nodes;
 }
-exports.findMethodCallExpressions = findMethodCallExpressions;
-function findClassPropertyConstructorParameterByType(node, type) {
+export function findClassPropertyConstructorParameterByType(node, type) {
     const query = `Constructor Parameter:has(TypeReference > Identifier[name="${type}"]):has(PublicKeyword,ProtectedKeyword,PrivateKeyword) > Identifier`;
-    const [result] = tsquery_1.tsquery(node, query);
+    const [result] = tsquery(node, query);
     if (result) {
         return result.text;
     }
     return null;
 }
-exports.findClassPropertyConstructorParameterByType = findClassPropertyConstructorParameterByType;
-function findClassPropertyDeclarationByType(node, type) {
+export function findClassPropertyDeclarationByType(node, type) {
     const query = `PropertyDeclaration:has(TypeReference > Identifier[name="${type}"]) > Identifier`;
-    const [result] = tsquery_1.tsquery(node, query);
+    const [result] = tsquery(node, query);
     if (result) {
         return result.text;
     }
     return null;
 }
-exports.findClassPropertyDeclarationByType = findClassPropertyDeclarationByType;
-function findFunctionCallExpressions(node, fnName) {
+export function findFunctionCallExpressions(node, fnName) {
     if (Array.isArray(fnName)) {
         fnName = fnName.join('|');
     }
     const query = `CallExpression:has(Identifier[name="${fnName}"]):not(:has(PropertyAccessExpression))`;
-    const nodes = tsquery_1.tsquery(node, query);
+    const nodes = tsquery(node, query);
     return nodes;
 }
-exports.findFunctionCallExpressions = findFunctionCallExpressions;
-function findPropertyCallExpressions(node, prop, fnName) {
+export function findPropertyCallExpressions(node, prop, fnName) {
     if (Array.isArray(fnName)) {
         fnName = fnName.join('|');
     }
     const query = `CallExpression > PropertyAccessExpression:has(Identifier[name=/^(${fnName})$/]):has(PropertyAccessExpression:has(Identifier[name="${prop}"]):has(ThisKeyword))`;
-    const nodes = tsquery_1.tsquery(node, query).map((n) => n.parent);
+    const nodes = tsquery(node, query).map((n) => n.parent);
     return nodes;
 }
-exports.findPropertyCallExpressions = findPropertyCallExpressions;
-function getStringsFromExpression(expression) {
-    if (typescript_1.isStringLiteralLike(expression)) {
+export function getStringsFromExpression(expression) {
+    if (isStringLiteralLike(expression)) {
         return [expression.text];
     }
-    if (typescript_1.isArrayLiteralExpression(expression)) {
+    if (isArrayLiteralExpression(expression)) {
         return expression.elements.reduce((result, element) => {
             const strings = getStringsFromExpression(element);
             return [...result, ...strings];
         }, []);
     }
-    if (typescript_1.isBinaryExpression(expression)) {
+    if (isBinaryExpression(expression)) {
         const [left] = getStringsFromExpression(expression.left);
         const [right] = getStringsFromExpression(expression.right);
-        if (expression.operatorToken.kind === typescript_1.SyntaxKind.PlusToken) {
+        if (expression.operatorToken.kind === SyntaxKind.PlusToken) {
             if (typeof left === 'string' && typeof right === 'string') {
                 return [left + right];
             }
         }
-        if (expression.operatorToken.kind === typescript_1.SyntaxKind.BarBarToken) {
+        if (expression.operatorToken.kind === SyntaxKind.BarBarToken) {
             const result = [];
             if (typeof left === 'string') {
                 result.push(left);
@@ -121,7 +109,7 @@ function getStringsFromExpression(expression) {
             return result;
         }
     }
-    if (typescript_1.isConditionalExpression(expression)) {
+    if (isConditionalExpression(expression)) {
         const [whenTrue] = getStringsFromExpression(expression.whenTrue);
         const [whenFalse] = getStringsFromExpression(expression.whenFalse);
         const result = [];
@@ -135,5 +123,4 @@ function getStringsFromExpression(expression) {
     }
     return [];
 }
-exports.getStringsFromExpression = getStringsFromExpression;
 //# sourceMappingURL=ast-helpers.js.map

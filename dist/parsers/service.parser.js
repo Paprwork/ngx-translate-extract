@@ -1,18 +1,16 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ServiceParser = void 0;
-const tsquery_1 = require("@phenomnomnominal/tsquery");
-const translation_collection_1 = require("../utils/translation.collection");
-const ast_helpers_1 = require("../utils/ast-helpers");
+import { tsquery } from '@phenomnomnominal/tsquery';
+import { TranslationCollection } from '../utils/translation.collection.js';
+import { findClassDeclarations, findClassPropertyByType, findPropertyCallExpressions, findMethodCallExpressions, getStringsFromExpression, findMethodParameterByType, findConstructorDeclaration } from '../utils/ast-helpers.js';
 const TRANSLATE_SERVICE_TYPE_REFERENCE = 'TranslateService';
 const TRANSLATE_SERVICE_METHOD_NAMES = ['get', 'instant', 'stream'];
-class ServiceParser {
+export class ServiceParser {
     extract(source, filePath) {
-        const sourceFile = tsquery_1.tsquery.ast(source, filePath);
-        const classDeclarations = ast_helpers_1.findClassDeclarations(sourceFile);
+        const sourceFile = tsquery.ast(source, filePath);
+        const classDeclarations = findClassDeclarations(sourceFile);
         if (!classDeclarations) {
             return null;
         }
-        let collection = new translation_collection_1.TranslationCollection();
+        let collection = new TranslationCollection();
         classDeclarations.forEach((classDeclaration) => {
             const callExpressions = [
                 ...this.findConstructorParamCallExpressions(classDeclaration),
@@ -23,27 +21,26 @@ class ServiceParser {
                 if (!firstArg) {
                     return;
                 }
-                const strings = ast_helpers_1.getStringsFromExpression(firstArg);
+                const strings = getStringsFromExpression(firstArg);
                 collection = collection.addKeys(strings);
             });
         });
         return collection;
     }
     findConstructorParamCallExpressions(classDeclaration) {
-        const constructorDeclaration = ast_helpers_1.findConstructorDeclaration(classDeclaration);
+        const constructorDeclaration = findConstructorDeclaration(classDeclaration);
         if (!constructorDeclaration) {
             return [];
         }
-        const paramName = ast_helpers_1.findMethodParameterByType(constructorDeclaration, TRANSLATE_SERVICE_TYPE_REFERENCE);
-        return ast_helpers_1.findMethodCallExpressions(constructorDeclaration, paramName, TRANSLATE_SERVICE_METHOD_NAMES);
+        const paramName = findMethodParameterByType(constructorDeclaration, TRANSLATE_SERVICE_TYPE_REFERENCE);
+        return findMethodCallExpressions(constructorDeclaration, paramName, TRANSLATE_SERVICE_METHOD_NAMES);
     }
     findPropertyCallExpressions(classDeclaration) {
-        const propName = ast_helpers_1.findClassPropertyByType(classDeclaration, TRANSLATE_SERVICE_TYPE_REFERENCE);
+        const propName = findClassPropertyByType(classDeclaration, TRANSLATE_SERVICE_TYPE_REFERENCE);
         if (!propName) {
             return [];
         }
-        return ast_helpers_1.findPropertyCallExpressions(classDeclaration, propName, TRANSLATE_SERVICE_METHOD_NAMES);
+        return findPropertyCallExpressions(classDeclaration, propName, TRANSLATE_SERVICE_METHOD_NAMES);
     }
 }
-exports.ServiceParser = ServiceParser;
 //# sourceMappingURL=service.parser.js.map

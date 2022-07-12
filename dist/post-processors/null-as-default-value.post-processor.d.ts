@@ -1,5 +1,5 @@
-import { TranslationCollection } from '../utils/translation.collection';
-import { PostProcessorInterface } from './post-processor.interface';
+import { TranslationCollection } from '../utils/translation.collection.js';
+import { PostProcessorInterface } from './post-processor.interface.js';
 export declare class NullAsDefaultValuePostProcessor implements PostProcessorInterface {
     name: string;
     process(draft: TranslationCollection, extracted: TranslationCollection, existing: TranslationCollection): TranslationCollection;

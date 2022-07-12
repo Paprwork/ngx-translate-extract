@@ -1,6 +1,6 @@
 import { AST, TmplAstNode, BindingPipe, LiteralPrimitive, Conditional } from '@angular/compiler';
-import { ParserInterface } from './parser.interface';
-import { TranslationCollection } from '../utils/translation.collection';
+import { ParserInterface } from './parser.interface.js';
+import { TranslationCollection } from '../utils/translation.collection.js';
 export declare class PipeParser implements ParserInterface {
     extract(source: string, filePath: string): TranslationCollection | null;
     protected findPipesInNode(node: any): BindingPipe[];

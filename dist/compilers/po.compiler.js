@@ -1,12 +1,10 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PoCompiler = void 0;
-const translation_collection_1 = require("../utils/translation.collection");
-const gettext_parser_1 = require("gettext-parser");
-class PoCompiler {
-    constructor(options) {
-        this.extension = 'po';
-        this.domain = '';
-    }
+import { TranslationCollection } from '../utils/translation.collection.js';
+import pkg from 'gettext-parser';
+const { po } = pkg;
+export class PoCompiler {
+    extension = 'po';
+    domain = '';
+    constructor(options) { }
     compile(collection) {
         const data = {
             charset: 'utf-8',
@@ -27,11 +25,11 @@ class PoCompiler {
                 }, {})
             }
         };
-        return gettext_parser_1.po.compile(data).toString('utf8');
+        return po.compile(data).toString('utf8');
     }
     parse(contents) {
-        const collection = new translation_collection_1.TranslationCollection();
-        const parsedPo = gettext_parser_1.po.parse(contents, 'utf8');
+        const collection = new TranslationCollection();
+        const parsedPo = po.parse(contents, 'utf8');
         if (!parsedPo.translations.hasOwnProperty(this.domain)) {
             return collection;
         }
@@ -43,8 +41,7 @@ class PoCompiler {
                 [key]: parsedPo.translations[this.domain][key].msgstr.pop()
             };
         }, {});
-        return new translation_collection_1.TranslationCollection(values);
+        return new TranslationCollection(values);
     }
 }
-exports.PoCompiler = PoCompiler;
 //# sourceMappingURL=po.compiler.js.map
