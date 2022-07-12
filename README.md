@@ -1,9 +1,4 @@
 
-# Sample Paprwork
-node ./dist/index.js --input ../paprwork-v3-ui/src --output ./sample/{en-GB,fr-FR}.json --sort --null-as-default-value --format namespaced-json
-
-
-
 If this tool saves you time, please consider making a donation towards the continued maintainence and development: https://donate.biesbjerg.com
 
 [![Donate](images/donate-badge.png)](https://donate.biesbjerg.com)
