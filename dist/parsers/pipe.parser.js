@@ -55,7 +55,6 @@ export class PipeParser {
             ret.push(...this.parseTranslationKeysFromPipe(falseExp));
         }
         else if (pipeContent instanceof BindingPipe) {
-            console.log('--------------');
             if (pipeContent.args[0]) {
                 const index = pipeContent.args[0].keys.findIndex((item) => item.key === 'default');
                 if (index > -1) {

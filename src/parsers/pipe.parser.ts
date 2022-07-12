@@ -82,14 +82,12 @@ export class PipeParser implements ParserInterface {
 			const falseExp: LiteralPrimitive | Conditional = pipeContent.falseExp as any;
 			ret.push(...this.parseTranslationKeysFromPipe(falseExp));
 		} else if (pipeContent instanceof BindingPipe) {
-			console.log('--------------');
 			if (pipeContent.args[0]) {
 				const index: number = pipeContent.args[0].keys.findIndex((item: { key: string; }) => item.key === 'default');
 				if (index > -1) {
 					const value: any = pipeContent.exp;
 					value['default'] = pipeContent.args[0].values[index].value;
 					ret.push(value as any);
-					// console.log(JSON.stringify(value, null, 2));
 				} else {
 					ret.push(...this.parseTranslationKeysFromPipe(pipeContent.exp as any));
 				}
