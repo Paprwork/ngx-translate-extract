@@ -29,8 +29,8 @@ export class PipeParser implements ParserInterface {
 		const nodes: TmplAstNode[] = this.parseTemplate(source, filePath);
 		const pipes: BindingPipe[] = nodes.map((node) => this.findPipesInNode(node)).flat();
 		pipes.forEach((pipe) => {
-			this.parseTranslationKeysFromPipe(pipe).forEach((key: string) => {
-				collection = collection.add(key);
+			this.parseTranslationKeysFromPipe(pipe).forEach((key: any) => {
+				collection = collection.add(key.value, key.default);
 			});
 		});
 		return collection;
@@ -72,8 +72,8 @@ export class PipeParser implements ParserInterface {
 		return ret;
 	}
 
-	protected parseTranslationKeysFromPipe(pipeContent: BindingPipe | LiteralPrimitive | Conditional): string[] {
-		const ret: string[] = [];
+	protected parseTranslationKeysFromPipe(pipeContent: BindingPipe | LiteralPrimitive | Conditional): any[] {
+		const ret: any[] = [];
 		if (pipeContent instanceof LiteralPrimitive) {
 			ret.push(pipeContent.value);
 		} else if (pipeContent instanceof Conditional) {
@@ -82,7 +82,20 @@ export class PipeParser implements ParserInterface {
 			const falseExp: LiteralPrimitive | Conditional = pipeContent.falseExp as any;
 			ret.push(...this.parseTranslationKeysFromPipe(falseExp));
 		} else if (pipeContent instanceof BindingPipe) {
-			ret.push(...this.parseTranslationKeysFromPipe(pipeContent.exp as any));
+			console.log('--------------');
+			if (pipeContent.args[0]) {
+				const index: number = pipeContent.args[0].keys.findIndex((item: { key: string; }) => item.key === 'default');
+				if (index > -1) {
+					const value: any = pipeContent.exp;
+					value['default'] = pipeContent.args[0].values[index].value;
+					ret.push(value as any);
+					// console.log(JSON.stringify(value, null, 2));
+				} else {
+					ret.push(...this.parseTranslationKeysFromPipe(pipeContent.exp as any));
+				}
+			} else {
+				ret.push(...this.parseTranslationKeysFromPipe(pipeContent.exp as any));
+			}
 		}
 		return ret;
 	}
