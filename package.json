@@ -35,10 +35,6 @@
       "prettier --write"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/biesbjerg/ngx-translate-extract.git"
-  },
   "keywords": [
     "angular",
     "ionic",
