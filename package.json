@@ -1,7 +1,7 @@
 {
-  "name": "@biesbjerg/ngx-translate-extract",
-  "version": "8.0.2",
-  "description": "Extract strings from projects using ngx-translate",
+  "name": "@paprwork/ngx-translate-extract",
+  "version": "1.0.0",
+  "description": "A fork of @biesbjerg/ngx-translate-extract supporting default values for translations",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/biesbjerg/ngx-translate-extract.git"
+    "url": "https://github.com/Paprwork/ngx-translate-extract"
   },
   "keywords": [
     "angular",
@@ -51,12 +51,12 @@
     "i18n",
     "gettext"
   ],
-  "author": "Kim Biesbjerg <kim@biesbjerg.com>",
+  "author": "Paprwork <dev@paprwork.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/biesbjerg/ngx-translate-extract/issues"
+    "url": "https://github.com/Paprwork/ngx-translate-extract/issues"
   },
-  "homepage": "https://github.com/biesbjerg/ngx-translate-extract",
+  "homepage": "https://github.com/Paprwork/ngx-translate-extract",
   "engines": {
     "node": ">=12"
   },
