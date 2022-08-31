@@ -65,7 +65,9 @@ export class ExtractTask implements TaskInterface {
 			}
 
 			// merge extracted strings with existing
-			const draft = extracted.union(existing);
+			let draft = extracted.union(existing);
+			draft = draft.remove('primeng'); // Remove Primeng key (overrides config)
+			draft = draft.remove('undefined'); // Remove undefined key (WTF)
 
 			// Run collection through post processors
 			const final = this.process(draft, extracted, existing);

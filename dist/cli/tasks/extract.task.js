@@ -49,7 +49,10 @@ export class ExtractTask {
                     throw e;
                 }
             }
-            const draft = extracted.union(existing);
+            console.log('Existing', existing);
+            let draft = extracted.union(existing);
+            draft = draft.remove('primeng');
+            draft = draft.remove('undefined');
             const final = this.process(draft, extracted, existing);
             try {
                 let event = 'CREATED';
